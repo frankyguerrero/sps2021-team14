@@ -17,21 +17,27 @@
  * Geo API key: AIzaSyDvkybevSYu7sdVcv07rWaieNTLR3w8FEs
  */
 
+
+ /**
+  * TODO: retrive lattitude and longitude from geolocation API
+  */
+
 async function resSearch(input) {
-    const lat = '';
-    const lon = '';
-    const dist = '';
-    const input = '';
+    const lat = '';  // user current lattitude
+    const lon = '';  // user current longitude
+    const dist = '';  // distance input from user indicating range in mile radius fro search
+    const input = ''; // will contain string input from user
     var resturants = {};
 
-    const url = 
+    var url = 
         'https://api.documenu.com/v2/menuitems/search/geo?lat=' + lat +
         '&lon=' + lon + '&distance=' + dist +
         '&search=' + input + '&key=eecbee0d473c6eaf6b93a377be2eb6cb';
 
     $.getJSON(url, function(data){
         resturants = data.data;
-    });        
-
+    }); 
+    
+    return resturants;
 }
 

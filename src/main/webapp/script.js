@@ -1,4 +1,3 @@
-// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,16 +12,32 @@
 // limitations under the License.
 
 /**
- * Adds a random greeting to the page.
+ * Uses documenu API to retrive resturants with imputted item on menu.
+ * Dounmenu API key: eecbee0d473c6eaf6b93a377be2eb6cb
+ * Geo API key: AIzaSyDvkybevSYu7sdVcv07rWaieNTLR3w8FEs
  */
-function addRandomGreeting() {
-  const greetings =
-      ['Hello world!', '¡Hola Mundo!', '你好，世界！', 'Bonjour le monde!'];
 
-  // Pick a random greeting.
-  const greeting = greetings[Math.floor(Math.random() * greetings.length)];
 
-  // Add it to the page.
-  const greetingContainer = document.getElementById('greeting-container');
-  greetingContainer.innerText = greeting;
+ /**
+  * TODO: retrive lattitude and longitude from geolocation API
+  */
+
+async function resSearch(input) {
+    const lat = '';  // user current lattitude
+    const lon = '';  // user current longitude
+    const dist = '';  // distance input from user indicating range in mile radius fro search
+    const input = ''; // will contain string input from user
+    var resturants = {};
+
+    var url = 
+        'https://api.documenu.com/v2/menuitems/search/geo?lat=' + lat +
+        '&lon=' + lon + '&distance=' + dist +
+        '&search=' + input + '&key=eecbee0d473c6eaf6b93a377be2eb6cb';
+
+    $.getJSON(url, function(data){
+        resturants = data.data;
+    }); 
+    
+    return resturants;
 }
+

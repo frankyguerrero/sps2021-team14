@@ -34,9 +34,6 @@ let currentInfoWindow;
 let service;
 let infoPane;
 async function initMap() {
-    const responseFromServer = fetch('/query');
-    const textFromResponse = await responseFromServer.text();
-
     bounds = new google.maps.LatLngBounds();
     infoWindow = new google.maps.infoWindow;
     currentInfoWindow = infoWindow;
@@ -61,7 +58,7 @@ async function initMap() {
             infoWindow.open(map);
             map.setCenter(pos);
 
-            getNearbyPlaces(pos, textFromResponse);
+            getNearbyPlaces(pos);
         }, () => {
             handleLocationError(true,infoWindow);
         });
@@ -69,5 +66,5 @@ async function initMap() {
     else{
         handleLocationError(false, infoWindow);
     }
-    //const responseFromServer = await fetch('/fact');
+    const responseFromServer = await fetch('/fact');
 }

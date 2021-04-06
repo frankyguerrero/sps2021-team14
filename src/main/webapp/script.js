@@ -19,6 +19,27 @@ var currentInfoWindow;
 var service;
 var infoPane;
 
+var fastFood = [];
+
+// code source: https://stackoverflow.com/questions/23331546/how-to-use-javascript-to-read-local-text-file-and-read-line-by-line
+// read each line of the text file and add to fastFood array
+const file = "uniqueFastFoods.txt"
+const reader = new FileReader();
+
+reader.onload = (event) => {
+        const file = event.target.result;
+        const allLines = file.split(/\r\n|\n/);
+        // Reading line by line
+        allLines.forEach((line) => {
+            fastFood.push(line);
+        });
+    };
+
+reader.onerror = (event) => {
+    alert(event.target.error.name);
+};
+
+
 function initPosition()
 {
     bounds = new google.maps.LatLngBounds();
@@ -108,24 +129,26 @@ function nearbyCallback(results, status) {
 // Set markers at the location of each place result
 function createMarkers(places) {
       places.forEach(place => {
-        let marker = new google.maps.Marker({
-          position: place.geometry.location,
-          map: map,
-          title: place.name
-        });
+        if (fastFood.includes(place.name) == false) {
+            let marker = new google.maps.Marker({
+                position: place.geometry.location,
+                map: map,
+                title: place.name
+            });
 
-        google.maps.event.addListener(marker, 'click', () => {
-          const request = {
-            placeId: place.place_id,
-            fields: ['name', 'formatted_address', 'geometry', 'rating',
-              'website', 'photos']
-          };
+            google.maps.event.addListener(marker, 'click', () => {
+                const request = {
+                    placeId: place.place_id,
+                    fields: ['name', 'formatted_address', 'geometry', 'rating',
+                    'website', 'photos']
+                };
 
          
-          service.getDetails(request, (placeResult, status) => {
-            showDetails(placeResult, marker, status)
-          });
-        });
+                service.getDetails(request, (placeResult, status) => {
+                    showDetails(placeResult, marker, status)
+                });
+            });
+        }
 
         // Adjust the map bounds to include the location of this marker
         bounds.extend(place.geometry.location);

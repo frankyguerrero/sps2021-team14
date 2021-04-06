@@ -18,11 +18,43 @@ var infoWindow;
 var currentInfoWindow;
 var service;
 var infoPane;
+var fastFood = [];
 
+// code source: https://stackoverflow.com/questions/23331546/how-to-use-javascript-to-read-local-text-file-and-read-line-by-line
+// read each line of the text file and add to fastFood array
+const file = "uniqueFastFoods.txt"
+//const reader = new FileReader();
+
+function parseFile(file) {
+    $.get(file, function(data) {
+        const allLines = data.split("\n");
+        allLines.forEach((line) => {
+            fastFood.push(line);
+        });
+    });
+}
+
+
+
+/*reader.onload = (event) => {
+        const file = event.target.result;
+        const allLines = file.split("\n");
+        // Reading line by line
+        
+};
+
+reader.onerror = (event) => {
+        alert(event.target.error.name);
+};*/
+
+
+
+//Get user position, if possible
 function initPosition()
 {
     bounds = new google.maps.LatLngBounds();
     infoWindow = new google.maps.InfoWindow;
+    parseFile(file)
     if(navigator.geolocation)
     {
         navigator.geolocation.getCurrentPosition(position => {
@@ -30,7 +62,7 @@ function initPosition()
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
             };
-
+            
             initMap(pos, infoWindow);            
         }, () =>
         {
@@ -43,6 +75,7 @@ function initPosition()
     }    
 }
 
+//Function to initalize map after getting user's position
 function initMap(pos, infoWindow) {
   
     currentInfoWindow = infoWindow;
@@ -90,7 +123,7 @@ function getNearbyPlaces(position) {
     let request = {
         location: position,
         rankBy: google.maps.places.RankBy.DISTANCE,
-        keyword: 'sushi'
+        keyword: 'Pizza'
     };
 
     service = new google.maps.places.PlacesService(map);
@@ -108,31 +141,33 @@ function nearbyCallback(results, status) {
 // Set markers at the location of each place result
 function createMarkers(places) {
       places.forEach(place => {
-        let marker = new google.maps.Marker({
-          position: place.geometry.location,
-          map: map,
-          title: place.name
-        });
+        if(fastFood.includes(place.name) == false) {
+            let marker = new google.maps.Marker({
+            position: place.geometry.location,
+            map: map,
+            title: place.name
+            });
 
-        google.maps.event.addListener(marker, 'click', () => {
-          const request = {
-            placeId: place.place_id,
-            fields: ['name', 'formatted_address', 'geometry', 'rating',
-              'website', 'photos']
-          };
+            google.maps.event.addListener(marker, 'click', () => {
+            const request = {
+                placeId: place.place_id,
+                fields: ['name', 'formatted_address', 'geometry', 'rating',
+                'website', 'photos']
+            };
 
-         
-          service.getDetails(request, (placeResult, status) => {
-            showDetails(placeResult, marker, status)
-          });
-        });
+            service.getDetails(request, (placeResult, status) => {
+                showDetails(placeResult, marker, status)
+            });
+            });
 
-        // Adjust the map bounds to include the location of this marker
-        bounds.extend(place.geometry.location);
+            // Adjust the map bounds to include the location of this marker
+            bounds.extend(place.geometry.location);
+        }  
       });
       map.fitBounds(bounds);
 }
 
+//Shows details for each marker when clicked
 function showDetails(placeResult, marker, status) {
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         let placeInfowindow = new google.maps.InfoWindow();
@@ -162,7 +197,7 @@ function showDetails(placeResult, marker, status) {
         infoPane.removeChild(infoPane.lastChild);
       }
 
-      // Add the primary photo, if there is one
+      // Add  photo, if there is one
       if (placeResult.photos) {
         let firstPhoto = placeResult.photos[0];
         let photo = document.createElement('img');

@@ -11,60 +11,207 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+var pos;
+var map;
+var bounds;
+var infoWindow;
+var currentInfoWindow;
+var service;
+var infoPane;
 
-/**
- * Adds a random greeting to the page.
- */
-/*function addRandomGreeting() {
-  const greetings =
-      ['Hello world!', '¡Hola Mundo!', '你好，世界！', 'Bonjour le monde!'];
-
-  // Pick a random greeting.
-  const greeting = greetings[Math.floor(Math.random() * greetings.length)];
-
-  // Add it to the page.
-  const greetingContainer = document.getElementById('greeting-container');
-  greetingContainer.innerText = greeting;
-}*/
-let pos;
-let map;
-let bounds;
-let infoWindow;
-let currentInfoWindow;
-let service;
-let infoPane;
-async function initMap() {
+function initPosition()
+{
     bounds = new google.maps.LatLngBounds();
-    infoWindow = new google.maps.infoWindow;
-    currentInfoWindow = infoWindow;
-
-    infoPane = document.getElementById('panel');
-
-    if(navigator.geolocation){
+    infoWindow = new google.maps.InfoWindow;
+    if(navigator.geolocation)
+    {
         navigator.geolocation.getCurrentPosition(position => {
             pos = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
             };
 
-            map = new google.map.Map(document.getElementById('map'),{
-                center: pos,
-                zoom: 15
-            });
-
-            bounds.extend(pos);
-            infoWindow.setPosition(pos);
-            infoWindow.setContent('Location found.');
-            infoWindow.open(map);
-            map.setCenter(pos);
-
-            getNearbyPlaces(pos);
-        }, () => {
+            initMap(pos, infoWindow);            
+        }, () =>
+        {
             handleLocationError(true,infoWindow);
         });
     }
-    else{
+    else
+    {
         handleLocationError(false, infoWindow);
-    }
-    const responseFromServer = await fetch('/fact');
+    }    
 }
+
+function initMap(pos, infoWindow) {
+  
+    currentInfoWindow = infoWindow;
+
+    infoPane = document.getElementById('sidePanel');
+
+    map = new google.maps.Map(document.getElementById('map'),{
+        center: pos,
+        zoom: 15
+    });
+
+    bounds.extend(pos);
+    infoWindow.setPosition(pos);
+    infoWindow.setContent('Location found.');
+    infoWindow.open(map);
+    map.setCenter(pos);
+
+    getNearbyPlaces(pos);
+}
+
+
+// Handle a geolocation error
+function handleLocationError(browserHasGeolocation, infoWindow) {
+    // Set default location to Tokyo, Japan
+    pos = { lat: 35.676, lng: 139.650 };
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: pos,
+        zoom: 15
+    });
+    // Display an InfoWindow at the map center
+    infoWindow.setPosition(pos);
+    infoWindow.setContent(browserHasGeolocation ?
+    'Geolocation permissions denied. Using default location.' :
+    'Error: Your browser doesn\'t support geolocation.');
+    infoWindow.open(map);
+    currentInfoWindow = infoWindow;
+
+    // Call Places Nearby Search on the default location
+    getNearbyPlaces(pos);
+}
+
+
+// Perform a Places Nearby Search Request
+function getNearbyPlaces(position) {
+    let request = {
+        location: position,
+        rankBy: google.maps.places.RankBy.DISTANCE,
+        keyword: 'sushi'
+    };
+
+    service = new google.maps.places.PlacesService(map);
+    service.nearbySearch(request, nearbyCallback);
+}
+
+
+ // Handle the results (up to 20) of the Nearby Search
+function nearbyCallback(results, status) {
+    if (status == google.maps.places.PlacesServiceStatus.OK) {
+        createMarkers(results);
+    }
+}
+
+// Set markers at the location of each place result
+function createMarkers(places) {
+      places.forEach(place => {
+        let marker = new google.maps.Marker({
+          position: place.geometry.location,
+          map: map,
+          title: place.name
+        });
+
+        google.maps.event.addListener(marker, 'click', () => {
+          const request = {
+            placeId: place.place_id,
+            fields: ['name', 'formatted_address', 'geometry', 'rating',
+              'website', 'photos']
+          };
+
+         
+          service.getDetails(request, (placeResult, status) => {
+            showDetails(placeResult, marker, status)
+          });
+        });
+
+        // Adjust the map bounds to include the location of this marker
+        bounds.extend(place.geometry.location);
+      });
+      map.fitBounds(bounds);
+}
+
+function showDetails(placeResult, marker, status) {
+      if (status == google.maps.places.PlacesServiceStatus.OK) {
+        let placeInfowindow = new google.maps.InfoWindow();
+        let rating = "None";
+        if (placeResult.rating) rating = placeResult.rating;
+        placeInfowindow.setContent('<div><strong>' + placeResult.name +
+          '</strong><br>' + 'Rating: ' + rating + '</div>');
+        placeInfowindow.open(marker.map, marker);
+        currentInfoWindow.close();
+        currentInfoWindow = placeInfowindow;
+        showPanel(placeResult);
+      } else {
+        console.log('showDetails failed: ' + status);
+      }
+}
+
+
+    // Displays place details in a sidebar
+    function showPanel(placeResult) {
+      // If infoPane is already open, close it
+      if (infoPane.classList.contains("open")) {
+        infoPane.classList.remove("open");
+      }
+
+      // Clear the previous details
+      while (infoPane.lastChild) {
+        infoPane.removeChild(infoPane.lastChild);
+      }
+
+      // Add the primary photo, if there is one
+      if (placeResult.photos) {
+        let firstPhoto = placeResult.photos[0];
+        let photo = document.createElement('img');
+        photo.classList.add('hero');
+        photo.src = firstPhoto.getUrl();
+        infoPane.appendChild(photo);
+      }
+
+      // Add place details with text formatting
+      let name = document.createElement('h1');
+      name.classList.add('place');
+      name.textContent = placeResult.name;
+      infoPane.appendChild(name);
+      if (placeResult.rating) {
+        let rating = document.createElement('p');
+        rating.classList.add('details');
+        rating.textContent = `Rating: ${placeResult.rating} \u272e`;
+        infoPane.appendChild(rating);
+      }
+      let address = document.createElement('p');
+      address.classList.add('details');
+      address.textContent = placeResult.formatted_address;
+      infoPane.appendChild(address);
+      if (placeResult.website) {
+        let websitePara = document.createElement('p');
+        let websiteLink = document.createElement('a');
+        let websiteUrl = document.createTextNode(placeResult.website);
+        websiteLink.appendChild(websiteUrl);
+        websiteLink.title = placeResult.website;
+        websiteLink.href = placeResult.website;
+        websitePara.appendChild(websiteLink);
+        infoPane.appendChild(websitePara);
+      }
+
+      // Open the infoPane
+      infoPane.classList.add("open");
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  window.addEventListener('scroll', function() {
+      if (window.scrollY > 50) {
+        document.getElementById('navbar_top').classList.add('fixed-top');
+        // add padding top to show content behind navbar
+        navbar_height = document.querySelector('.navbar').offsetHeight;
+        document.body.style.paddingTop = navbar_height + 'px';
+      } else {
+        document.getElementById('navbar_top').classList.remove('fixed-top');
+         // remove padding top from body
+        document.body.style.paddingTop = '0';
+      } 
+  });
+}); 

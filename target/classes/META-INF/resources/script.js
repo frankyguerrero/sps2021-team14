@@ -49,11 +49,12 @@ reader.onerror = (event) => {
 
 
 
-
+//Get user position, if possible
 function initPosition()
 {
     bounds = new google.maps.LatLngBounds();
     infoWindow = new google.maps.InfoWindow;
+    parseFile(file)
     if(navigator.geolocation)
     {
         navigator.geolocation.getCurrentPosition(position => {
@@ -61,7 +62,7 @@ function initPosition()
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
             };
-            parseFile(file)
+            
             initMap(pos, infoWindow);            
         }, () =>
         {
@@ -74,6 +75,7 @@ function initPosition()
     }    
 }
 
+//Function to initalize map after getting user's position
 function initMap(pos, infoWindow) {
   
     currentInfoWindow = infoWindow;
@@ -165,6 +167,7 @@ function createMarkers(places) {
       map.fitBounds(bounds);
 }
 
+//Shows details for each marker when clicked
 function showDetails(placeResult, marker, status) {
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         let placeInfowindow = new google.maps.InfoWindow();
@@ -194,7 +197,7 @@ function showDetails(placeResult, marker, status) {
         infoPane.removeChild(infoPane.lastChild);
       }
 
-      // Add the primary photo, if there is one
+      // Add  photo, if there is one
       if (placeResult.photos) {
         let firstPhoto = placeResult.photos[0];
         let photo = document.createElement('img');
@@ -204,7 +207,7 @@ function showDetails(placeResult, marker, status) {
       }
 
       // Add place details with text formatting
-      let name = document.createElement('h1');
+      let name = document.createElement('h5');
       name.classList.add('place');
       name.textContent = placeResult.name;
       infoPane.appendChild(name);

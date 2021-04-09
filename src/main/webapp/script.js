@@ -207,7 +207,7 @@ function showDetails(placeResult, marker, status) {
       }
 
       // Add place details with text formatting
-      let name = document.createElement('h1');
+      let name = document.createElement('h5');
       name.classList.add('place');
       name.textContent = placeResult.name;
       infoPane.appendChild(name);

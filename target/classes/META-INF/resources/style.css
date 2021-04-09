@@ -1,17 +1,20 @@
-    /* Always set the map height explicitly to define the size of the div
-     * element that contains the map. */
-    #map {
-      height: 100%;
-      background-color: grey;
-    }
-
     /* Optional: Makes the sample page fill the window. */
     html,
     body {
       height: 100%;
       margin: 0;
       padding: 0;
+      background-color: #b4dbd2;
     }
+    /* Always set the map height explicitly to define the size of the div
+     * element that contains the map. */
+    #map {
+      height: 50%;
+      background-color: grey;
+      
+    }
+
+    
 
     /* Styling for an info pane that slides out from the left. 
      * Hidden by default. */
@@ -26,7 +29,7 @@
     }
 
     .open {
-      width: 250px;
+      width: 300px;
     }
 
     /* Styling for place details */
@@ -44,7 +47,7 @@
       padding-right: 18px;
     }
 
-    .details {
+    .details,h5 {
       color: darkslategrey;
     }
 
@@ -52,3 +55,52 @@
       text-decoration: none;
       color: cadetblue;
     }
+
+#navbar{
+  width: 100%;
+}
+#nav-container{
+  background-color: #f2918a;
+  width: 100%;
+}
+
+img{
+  height: 50px;
+  position: center;
+}
+#content-1 {
+  padding-top: 40px;
+  padding-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 650px;
+  background-color: #b4dbd2;
+  color: #f2918a;
+}
+
+#click-here{
+  background-color: #0c626b;
+}
+
+h1 {
+  font-family: Helvetica;
+  color: #26734b;
+}
+
+#content-2 {
+  padding-top: 40px;
+  width: 100%;
+  background-image: url("./images/restaurant-blur.jpg");
+}
+form {
+  margin-left: auto;
+  margin-right: auto;
+  padding: 35px;
+  width: 50%;
+  background-color: #f2918a;
+  color: #24302e;
+}
+
+#submit {
+  background-color: #24302e;
+}

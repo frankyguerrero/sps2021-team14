@@ -11,6 +11,7 @@
     #map {
       height: 50%;
       background-color: grey;
+      visibility: hidden;
       
     }
 

@@ -93,7 +93,7 @@ function initMap(pos, infoWindow) {
     infoWindow.open(map);
     map.setCenter(pos);
 
-    getNearbyPlaces(pos);
+    //getNearbyPlaces(pos);
 }
 
 
@@ -114,16 +114,18 @@ function handleLocationError(browserHasGeolocation, infoWindow) {
     currentInfoWindow = infoWindow;
 
     // Call Places Nearby Search on the default location
-    getNearbyPlaces(pos);
+    //getNearbyPlaces(pos);
 }
 
 
 // Perform a Places Nearby Search Request
-function getNearbyPlaces(position) {
+function getNearbyPlaces() {
+    event.preventDefault();
+    var searchStr = document.getElementById('foodInput').value;
     let request = {
-        location: position,
+        location: pos,
         rankBy: google.maps.places.RankBy.DISTANCE,
-        keyword: 'Pizza'
+        keyword: searchStr
     };
 
     service = new google.maps.places.PlacesService(map);

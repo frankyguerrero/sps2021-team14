@@ -19,6 +19,8 @@ var currentInfoWindow;
 var service;
 var infoPane;
 var fastFood = [];
+var resetFlag = false;
+var markers = [];
 
 // code source: https://stackoverflow.com/questions/23331546/how-to-use-javascript-to-read-local-text-file-and-read-line-by-line
 // read each line of the text file and add to fastFood array
@@ -115,21 +117,39 @@ function handleLocationError(browserHasGeolocation, infoWindow) {
 
     // Call Places Nearby Search on the default location
     //getNearbyPlaces(pos);
+    getNearbyPlaces();
 }
 
 
 // Perform a Places Nearby Search Request
 function getNearbyPlaces() {
-    event.preventDefault();
-    var searchStr = document.getElementById('foodInput').value;
-    let request = {
-        location: pos,
-        rankBy: google.maps.places.RankBy.DISTANCE,
-        keyword: searchStr
-    };
+    if(resetFlag === false)
+    {
+        document.getElementById('map').style.visibility = 'visible';
+        event.preventDefault();
+        var searchStr = document.getElementById('foodInput').value;
 
-    service = new google.maps.places.PlacesService(map);
-    service.nearbySearch(request, nearbyCallback);
+        
+        let request = {
+            location: pos,
+            rankBy: google.maps.places.RankBy.DISTANCE,
+            keyword: searchStr
+        };
+
+        service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(request, nearbyCallback);
+        resetFlag = true;
+    }
+    else
+    {
+        deleteMarkers();
+        bounds = new google.maps.LatLngBounds();
+        bounds.extend(pos);
+        map.fitBounds(bounds);
+        resetFlag = false;
+        getNearbyPlaces();
+    }
+    
 }
 
 
@@ -162,6 +182,7 @@ function createMarkers(places) {
             });
             });
 
+            markers.push(marker);
             // Adjust the map bounds to include the location of this marker
             bounds.extend(place.geometry.location);
         }  
@@ -236,6 +257,16 @@ function showDetails(placeResult, marker, status) {
 
       // Open the infoPane
       infoPane.classList.add("open");
+}
+
+
+function deleteMarkers()
+{
+    for(var i = 0; i < markers.length; i++)
+    {
+        markers[i].setMap(null);
+    }
+    markers = [];
 }
 
 
